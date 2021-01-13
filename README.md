@@ -1,2 +1,4 @@
-# Project2-Group4
-Jeroen Wolfe, Andrew Pepin, Rastal
+# Group 4's Project 2 repo
+###### Jeroen Wolfe, Andrew Pepin, Rastal
+## Features
+- Collects current and historical top-ten trending hashtags 
