@@ -1,7 +1,6 @@
-import org.apache.spark.sql.functions
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.types.
-  {LongType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{LongType, StringType}
 
 object MedianFollowerCount {
 
@@ -16,12 +15,51 @@ object MedianFollowerCount {
 
     import spark.implicits._  
 
-    val tweets = spark.read.csv("./tweet.tsv").as[Tweet]
-    // tweets.reduce(_.followers + _.followers)   // this is meant to be a 
-    //   mapreduce style function to output the total follower count of the entire
-    //   dataset
+    val schema = new StructType()
+      .add("tweet", StringType)
+      .add("username", StringType)
+      .add("followers", LongType)
+
+    val tweets = spark.read
+      .format("csv")
+      .schema(schema)
+      .option("delimiter", "\t")
+      .load("./tweet.tsv")
+      .as[Tweet]
+      .cache()
     
-    println(s"\nTOTAL FOLLOWERS:\n")
+    val userCount = tweets
+      .map(_.username)
+      .distinct()
+      .count()
+    val totalFollowers = tweets
+      .map(_.followers)
+      .reduce(_ + _)
+    val avgFollowers = totalFollowers / userCount
+    
+    val unsortedUsersWithFollowers = tweets
+      .map(x => (x.username, x.followers))
+      .distinct()
+      .collect()
+    val sortedFollowers = unsortedUsersWithFollowers
+      .toSeq
+      .sortWith((x, y) => x._2 > y._2)
+      .map(_._2)
+      .toArray
+    val median = {
+      if (userCount % 2 == 0) 
+        (userCount / 2).toInt 
+      else 
+        ((userCount + 1) / 2).toInt
+    }
+    val medianFollowers = sortedFollowers(median)
+    
+    println("\n")
+    println(s"TOTAL FOLLOWERS: $totalFollowers")
+    println(s"USER COUNT: $userCount")
+    println(s"AVG FOLLOWERS: $avgFollowers")
+    println(s"MEDIAN FOLLOWERS: $medianFollowers")
+    println("\n")
     spark.stop()
   }
 }
