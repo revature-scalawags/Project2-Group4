@@ -232,3 +232,6 @@ spark-warehouse/
 *.code-workspace
 
 # End of https://www.toptal.com/developers/gitignore/api/scala,spark,metals,intellij,sbt,vscode
+
+## Rastal's environment keys script
+historical-scraper/keys.ps1
