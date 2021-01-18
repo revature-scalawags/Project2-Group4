@@ -16,4 +16,7 @@ object HistoricalScraper extends App {
       println(s"${user.toUpperCase}'S LATEST TWEETS:")
       println(tweets.mkString("\n-----------\n"))
   }
+
+  Thread.sleep(5000)
+  client.shutdown()
 }
