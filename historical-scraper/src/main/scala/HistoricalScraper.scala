@@ -1,12 +1,12 @@
-import com.danielasfregola.twitter4s.TwitterRestClient
 import com.danielasfregola.twitter4s.entities.{HashTag, Tweet}
+import com.danielasfregola.twitter4s.TwitterRestClient
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object RestExample extends App {
+object HistoricalScraper extends App {
 
   // Make sure to define consumer and access tokens
   val client = TwitterRestClient()
-  val user = "therastal"
+  val user = "nintendoamerica"
   val limit = 10
 
   val results = client

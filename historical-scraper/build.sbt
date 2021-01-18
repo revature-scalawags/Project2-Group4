@@ -2,7 +2,7 @@ name := "historical-scraper"
 
 version := "1.0"
 
-scalaVersion := "2.13.4"
+scalaVersion := "2.12.12"
 
 resolvers += Resolver.sonatypeRepo("releases")
 
