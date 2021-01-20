@@ -4,7 +4,7 @@ lazy val root = (project in file(".")).
       organization := "com.revature.scalawags.group4",
       scalaVersion := "2.12.12"
     )),
-    name := "median-follower-count"
+    name := "hashtag-influence"
   )
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % Test
