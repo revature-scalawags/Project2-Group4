@@ -29,7 +29,9 @@ object Driver {
 
   def main(args: Array[String]): Unit = {
 
-    val ssc = new StreamingContext("local[*]", "Hashtags", Seconds(1))
+    setupTwitterConfig()
+
+    val ssc = new StreamingContext("local[*]", "Hashtags", Seconds(args(0).toInt))
 
     val tweets = TwitterUtils.createStream(ssc, None)
 
@@ -38,9 +40,11 @@ object Driver {
     val hashtags = words.filter(x => x.startsWith("#"))
 
     val hashtagsValues = hashtags.map(x => (x, 1))
-    val hashtagsCount = hashtags_values.reduceByKeyAndWindow((x, y) => x + y, (x, y) => x - y, Seconds(300), Seconds(1))
+    val hashtagsCount = hashtagsValues.reduceByKeyAndWindow((x, y) => x + y, (x, y) => x - y, Seconds(args(0).toInt), Seconds(args(0).toInt))
 
-    val results = hashtags_count.transform(x => x.sortBy(x => x._2, false))
+    val results = hashtagsCount.transform(x => x.sortBy(x => x._2, false))
+
+    results.print
 
     ssc.checkpoint("Checkpoint")
     ssc.start()
