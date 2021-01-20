@@ -2,11 +2,31 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.{LongType, StringType}
 
+import com.github.tototoshi.csv._
+
+import java.io.File
+import java.time.LocalDateTime
+import org.apache.spark.sql.Dataset
+import javax.xml.crypto.Data
+
 object MedianFollowerCount {
 
-  case class Tweet(tweet: String, username: String, followers: Long)
+  case class Tweet(text: String, username: String, followers: Long)
 
   def main(args: Array[String]) {
+    if (args.length != 1) {
+      println("[ERROR]: Please specify a tsv file as input with sbt \"run [filepath]\". " +
+        "Aborting execution.")
+      sys.exit(-1)
+    }
+    val input = args(0)
+    val pathNodes = input match {
+      case _ if input.contains("/") => input.split('/')
+      case _ if input.contains("\\") => input.split('\\')
+      case _ => Array(input)
+    }
+    val hashtag = pathNodes.last.split('.')(0)
+
     val spark = SparkSession
       .builder
       .master("local[1]")
@@ -16,7 +36,7 @@ object MedianFollowerCount {
     import spark.implicits._  
 
     val schema = new StructType()
-      .add("tweet", StringType)
+      .add("text", StringType)
       .add("username", StringType)
       .add("followers", LongType)
 
@@ -24,42 +44,69 @@ object MedianFollowerCount {
       .format("csv")
       .schema(schema)
       .option("delimiter", "\t")
-      .load("./tweet.tsv")
+      .option("header", true)
+      .load(input)
       .as[Tweet]
       .cache()
     
-    val userCount = tweets
-      .map(_.username)
-      .distinct()
-      .count()
-    val totalFollowers = tweets
-      .map(_.followers)
-      .reduce(_ + _)
-    val avgFollowers = totalFollowers / userCount
-    
-    val unsortedUsersWithFollowers = tweets
-      .map(x => (x.username, x.followers))
-      .distinct()
-      .collect()
-    val sortedFollowers = unsortedUsersWithFollowers
-      .toSeq
-      .sortWith((x, y) => x._2 > y._2)
-      .map(_._2)
-      .toArray
-    val median = {
-      if (userCount % 2 == 0) 
-        (userCount / 2).toInt 
-      else 
-        ((userCount + 1) / 2).toInt
+    /** Returns the total number of users in the dataset.*/
+    def calculateUserCount(t: Dataset[Tweet]): Long = {
+      t.map(_.username)
+        .distinct()
+        .count()
     }
-    val medianFollowers = sortedFollowers(median)
+
+    /** Returns the combined follower count of all users in the dataset.*/
+    def calculateTotalFollowers(t: Dataset[Tweet]): Long = {
+      t.map(_.followers)
+        .reduce(_ + _)
+    }
+
+    /** Returns the median follower count of all users in the dataset.*/
+    def calculateMedianFollowers(t: Dataset[Tweet]): Long = {
+      val unsortedUsersWithFollowers = t
+        .map(x => (x.username, x.followers))
+        .distinct()
+        .collect()
+      val sortedFollowers = unsortedUsersWithFollowers
+        .toSeq
+        .sortWith((x, y) => x._2 > y._2)
+        .map(_._2)
+        .toArray
+      val users = calculateUserCount(tweets)
+      val median = {
+        if (users % 2 == 0) 
+          (users / 2).toInt 
+        else 
+          ((users + 1) / 2).toInt
+      }
+
+      sortedFollowers(median)
+    }
     
-    println("\n")
-    println(s"TOTAL FOLLOWERS: $totalFollowers")
-    println(s"USER COUNT: $userCount")
-    println(s"AVG FOLLOWERS: $avgFollowers")
-    println(s"MEDIAN FOLLOWERS: $medianFollowers")
-    println("\n")
+    val userCount = calculateUserCount(tweets)
+    val totalFollowers = calculateTotalFollowers(tweets)
+    val avgFollowers = totalFollowers / userCount
+    val medianFollowers = calculateMedianFollowers(tweets)
+
+    implicit object TweetFormat extends DefaultCSVFormat {
+      override val delimiter = '\t'
+    }
+    val file = new File("influence-analysis.tsv")
+    val writer = CSVWriter.open(file)
+    writer.writeRow(Seq(
+      "timestamp",
+      "hashtag",
+      "userCount",
+      "totalFollowers",
+      "medianFollowers"))
+    writer.writeRow(Seq(
+      LocalDateTime.now(),
+      hashtag, 
+      userCount, 
+      totalFollowers,
+      medianFollowers))
+    writer.close()
     spark.stop()
   }
 }
