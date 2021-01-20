@@ -92,19 +92,15 @@ object MedianFollowerCount {
     implicit object TweetFormat extends DefaultCSVFormat {
       override val delimiter = '\t'
     }
-    val file = new File("influence-analysis.tsv")
-    val writer = CSVWriter.open(file)
-    writer.writeRow(Seq(
-      "timestamp",
-      "hashtag",
-      "userCount",
-      "totalFollowers",
-      "medianFollowers"))
+
+    val output = new File("influence-analysis.tsv")
+    val writer = CSVWriter.open(output, true)
     writer.writeRow(Seq(
       LocalDateTime.now(),
       hashtag, 
       userCount, 
       totalFollowers,
+      avgFollowers,
       medianFollowers))
     writer.close()
     spark.stop()
