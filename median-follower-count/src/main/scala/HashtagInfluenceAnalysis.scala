@@ -1,4 +1,6 @@
-import org.apache.spark.sql.SparkSession
+package com.revature.project2.group4.hashtaginfluence
+
+import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.{LongType, StringType}
 
@@ -6,13 +8,8 @@ import com.github.tototoshi.csv._
 
 import java.io.File
 import java.time.LocalDateTime
-import org.apache.spark.sql.Dataset
-import javax.xml.crypto.Data
 
-object MedianFollowerCount {
-
-  case class Tweet(text: String, username: String, followers: Long)
-
+object HashtagInfluenceAnalysis {
   def main(args: Array[String]) {
     if (args.length != 1) {
       println("[ERROR]: Please specify a tsv file as input with sbt \"run [filepath]\". " +
@@ -39,8 +36,7 @@ object MedianFollowerCount {
       .add("text", StringType)
       .add("username", StringType)
       .add("followers", LongType)
-
-    val tweets = spark.read
+    val tweetDS = spark.read
       .format("csv")
       .schema(schema)
       .option("delimiter", "\t")
@@ -48,46 +44,14 @@ object MedianFollowerCount {
       .load(input)
       .as[Tweet]
       .cache()
-    
-    /** Returns the total number of users in the dataset.*/
-    def calculateUserCount(t: Dataset[Tweet]): Long = {
-      t.map(_.username)
-        .distinct()
-        .count()
-    }
+    val tweetList = tweetDS
+      .collect()
+      .toList
 
-    /** Returns the combined follower count of all users in the dataset.*/
-    def calculateTotalFollowers(t: Dataset[Tweet]): Long = {
-      t.map(_.followers)
-        .reduce(_ + _)
-    }
-
-    /** Returns the median follower count of all users in the dataset.*/
-    def calculateMedianFollowers(t: Dataset[Tweet]): Long = {
-      val unsortedUsersWithFollowers = t
-        .map(x => (x.username, x.followers))
-        .distinct()
-        .collect()
-      val sortedFollowers = unsortedUsersWithFollowers
-        .toSeq
-        .sortWith((x, y) => x._2 > y._2)
-        .map(_._2)
-        .toArray
-      val users = calculateUserCount(tweets)
-      val median = {
-        if (users % 2 == 0) 
-          (users / 2).toInt 
-        else 
-          ((users + 1) / 2).toInt
-      }
-
-      sortedFollowers(median)
-    }
-    
-    val userCount = calculateUserCount(tweets)
-    val totalFollowers = calculateTotalFollowers(tweets)
+    val userCount = Utilities.calculateUserCount(tweetList)
+    val totalFollowers = Utilities.calculateTotalFollowers(tweetList)
     val avgFollowers = totalFollowers / userCount
-    val medianFollowers = calculateMedianFollowers(tweets)
+    val medianFollowers = Utilities.calculateMedianFollowers(tweetList)
 
     implicit object TweetFormat extends DefaultCSVFormat {
       override val delimiter = '\t'
@@ -95,6 +59,11 @@ object MedianFollowerCount {
 
     val output = new File("influence-analysis.tsv")
     val writer = CSVWriter.open(output, true)
+    try {
+      CSVReader.open(output).readNext().get
+    } catch {
+      case e: Exception => writeHeaderRow(writer)
+    }
     writer.writeRow(Seq(
       LocalDateTime.now(),
       hashtag, 
@@ -104,5 +73,15 @@ object MedianFollowerCount {
       medianFollowers))
     writer.close()
     spark.stop()
+  }
+
+  def writeHeaderRow(writer: CSVWriter): Unit = {
+    writer.writeRow(Seq(
+      "timestamp",
+      "hashtag",
+      "userCount",
+      "totalFollowers",
+      "avgFollowers",
+      "medianFollowers"))
   }
 }
