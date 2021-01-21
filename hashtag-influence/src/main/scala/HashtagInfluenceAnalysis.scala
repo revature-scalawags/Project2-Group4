@@ -83,8 +83,6 @@ object HashtagInfluenceAnalysis {
     s3client.putObject(s3Path,output.getName,output)
     writer.close()
     spark.stop()
-
-    
   }
 
   def writeHeaderRow(writer: CSVWriter): Unit = {
