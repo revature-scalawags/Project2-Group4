@@ -1,19 +1,17 @@
 // IMPORTS
-import org.apache.spark._
-import org.apache.spark.ml._
-
 import scala.io.Source
+import java.time.format.DateTimeFormatter
+import collection.JavaConverters._
+
+import org.apache.spark._
 import twitter4j.{Query, Status, Twitter, TwitterFactory}
 import twitter4j.conf.ConfigurationBuilder
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 
-import java.time.format.DateTimeFormatter
-import collection.JavaConverters._
-
 object Driver {
 
-  var numDaysPrior = 7 // Twitter API only lets you go back a week >>
-  var numTweetsPerDay = 10000
+  var numDaysPrior = 7 // Twitter API only lets you go back a week
+  var numTweetsPerDay = 200
   var queryTerm = ""
 
   def setupTwitterConfig(): ConfigurationBuilder = {
@@ -92,7 +90,7 @@ object Driver {
     val configBuilder = setupTwitterConfig()
 
     // Set up spark context
-    val conf = new SparkConf().setAppName("test").setMaster("local")
+    val conf = new SparkConf().setAppName("Sentiment Analyzer").setMaster("local")
     val sc = new SparkContext(conf)
 
     // Set up sentiment detector

@@ -1,12 +1,11 @@
 
 import scala.io.Source
-import org.apache.spark._
-import org.apache.spark.SparkContext._
+
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.twitter._
-import org.apache.spark.streaming.StreamingContext._
 
 object Driver {
+  val batchInterval = 1
 
   def setupTwitterConfig(): Unit = {
     for (line <- Source.fromFile("secret.txt").getLines()) {
@@ -31,7 +30,7 @@ object Driver {
 
     setupTwitterConfig()
 
-    val ssc = new StreamingContext("local[*]", "Hashtags", Seconds(args(0).toInt))
+    val ssc = new StreamingContext("local[*]", "Trending Hashtags", Seconds(1)
 
     val tweets = TwitterUtils.createStream(ssc, None)
 
@@ -40,7 +39,7 @@ object Driver {
     val hashtags = words.filter(x => x.startsWith("#"))
 
     val hashtagsValues = hashtags.map(x => (x, 1))
-    val hashtagsCount = hashtagsValues.reduceByKeyAndWindow((x, y) => x + y, (x, y) => x - y, Seconds(args(0).toInt), Seconds(args(0).toInt))
+    val hashtagsCount = hashtagsValues.reduceByKeyAndWindow((x, y) => x + y, (x, y) => x - y, Seconds(args(0).toInt), Seconds(1))
 
     val results = hashtagsCount.transform(x => x.sortBy(x => x._2, false))
 
