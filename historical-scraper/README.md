@@ -1,6 +1,8 @@
-# historical-scraper
-Example application using [twitter4s](https://github.com/DanielaSfregola/twitter4s) library.
+# Historical Scraper
 
+Scrape historical tweets associated with a given hashtag and dump them into AWS storage, using Twitter's REST API.
+
+Much thanks to Daniela Sfregola for their twitter4s library.
 
 ## Usage
 Add your consumer and access token as environment variables:
@@ -12,8 +14,5 @@ export TWITTER_ACCESS_TOKEN_KEY='my-access-key'
 export TWITTER_ACCESS_TOKEN_SECRET='my-access-secret'
 ```
 
-The sample project contains examples for both REST and streaming client. 
 
-Run the examples with ```sbt run``` and choose the main to run.
-
-
+Run with ```sbt run``` and choose the main to run.

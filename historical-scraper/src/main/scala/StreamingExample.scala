@@ -1,4 +1,4 @@
-import com.danielasfregola.twitter4s.TwitterStreamingClient
+/* import com.danielasfregola.twitter4s.TwitterStreamingClient
 import com.danielasfregola.twitter4s.entities.Tweet
 
 
@@ -16,3 +16,4 @@ object StreamingExample extends App {
   }
 
 }
+ */
