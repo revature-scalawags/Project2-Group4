@@ -1,9 +1,8 @@
 # Group 4's Project 2 repo
-###### Jeroen Wolfe, Andrew Pepin, Rastal
 
 ## Project Description
 
-Here goes your awesome project description!
+Various programs to scrape, stream, and analyze Tweets.
 
 ## Technologies Used
 
@@ -12,16 +11,14 @@ Here goes your awesome project description!
   * Spark Streaming
 * JonSnowLabs NLP
 * AWS S3
-* AWS Glue
 
 ## Features
 
-List of features ready and TODOs for future development
 * Collects current and historical top-ten trending hashtags 
-* Awesome feature 2
-* Awesome feature 3
+* Analyzes batches of tweets using a particular hashtag and outputs basic influence metrics for that hashtag.
+* Performs sentiment analysis on either historical or streaming data.
 
-To-do list:
+TODO:
 * Wow improvement to be done 1
 * Wow improvement to be done 2
 
@@ -42,7 +39,9 @@ To-do list:
 
 ## Contributors
 
-> Here list the people who have contributed to this project. (ignore this section, if its a solo project)
+* Jeroen Wolfe
+* Andrew Pepin
+* Rastal
 
 ## License
 
