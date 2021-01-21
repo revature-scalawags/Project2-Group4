@@ -13,25 +13,32 @@ object Utilities {
 
   /** Returns the combined follower count of all users in the dataset.*/
   def calculateTotalFollowers(tweets: Seq[Tweet]): Long = {
-    tweets
-      .map(_.followers)
+    val usersFollowers = tweets
+      .reverse
+      .map(x => (x.username, x.followers))
+      .distinct
+    val followers = usersFollowers
+      .map(_._2)
       .reduce(_ + _)
+    
+    followers
   }
 
   /** Returns the median follower count of all users in the dataset.*/
   def calculateMedianFollowers(tweets: Seq[Tweet]): Long = {
-    val unsortedUsersWithFollowers = 
-      Map(tweets.reverse.map(x => x.username -> x.followers):_*)
-    val sortedFollowers = unsortedUsersWithFollowers
+    val usersFollowers = tweets
+      .reverse
+      .map(x => (x.username, x.followers))
+      .distinct
+    val sortedFollowers = usersFollowers
       .map(_._2)
-      .toSeq
       .sortWith((x, y) => x > y)
     val users = calculateUserCount(tweets)
     val median = {
       if (users % 2 == 0) 
-        (users / 2).toInt 
+        (users / 2).toInt - 1
       else 
-        ((users + 1) / 2).toInt
+        ((users + 1) / 2).toInt - 1
     }
 
     sortedFollowers(median)
