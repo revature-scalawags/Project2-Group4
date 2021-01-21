@@ -3,6 +3,9 @@ package com.revature.project2.group4.hashtaginfluence
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.{LongType, StringType}
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.services.s3.{AmazonS3ClientBuilder}
+import com.amazonaws.services.s3.AmazonS3
 
 import com.github.tototoshi.csv._
 
@@ -16,6 +19,10 @@ object HashtagInfluenceAnalysis {
         "Aborting execution.")
       sys.exit(-1)
     }
+
+    val key = System.getenv("AWS_ACCESS_KEY_ID")
+    val secret = System.getenv("AWS_SECRET_ACCESS_KEY")
+    val s3client = getS3Client(key, secret)
     val input = args(0)
     val pathNodes = input match {
       case _ if input.contains("/") => input.split('/')
@@ -71,8 +78,13 @@ object HashtagInfluenceAnalysis {
       totalFollowers,
       avgFollowers,
       medianFollowers))
+
+    val s3Path = "jeroen-twitter-demo-bucket/output"
+    s3client.putObject(s3Path,output.getName,output)
     writer.close()
     spark.stop()
+
+    
   }
 
   def writeHeaderRow(writer: CSVWriter): Unit = {
@@ -83,5 +95,15 @@ object HashtagInfluenceAnalysis {
       "totalFollowers",
       "avgFollowers",
       "medianFollowers"))
+  }
+
+  def getS3Client(key: String, secret: String): AmazonS3 = {
+    val credentials = new BasicAWSCredentials(key, secret)
+    val client = AmazonS3ClientBuilder
+      .standard()
+      .withCredentials(new AWSStaticCredentialsProvider(credentials))
+      .withRegion("us-east-2")
+      .build();
+    client
   }
 }
