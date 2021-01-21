@@ -235,3 +235,5 @@ spark-warehouse/
 
 ## Rastal's environment keys script
 historical-scraper/keys.ps1
+*.tsv 
+!*tweet.tsv
