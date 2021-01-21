@@ -1,0 +1,6 @@
+.bsp/
+.idea/
+Checkpoint/
+target/
+project/target
+secret.txt
