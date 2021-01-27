@@ -34,9 +34,8 @@ object HashtagInfluenceAnalysis {
     val spark = SparkSession
       .builder
       .master("local[1]")
-      .appName("median-follower-count")
+      .appName("hashtag-influence-analysis")
       .getOrCreate()
-
     import spark.implicits._  
 
     val schema = new StructType()
@@ -52,13 +51,12 @@ object HashtagInfluenceAnalysis {
       .as[Tweet]
       .cache()
     val tweetList = tweetDS
-      .collect()
-      .toList
+      .collectAsList()
 
-    val userCount = Utilities.calculateUserCount(tweetList)
-    val totalFollowers = Utilities.calculateTotalFollowers(tweetList)
+    val userCount = Utilities.calculateUserCount(tweetDS, spark)
+    val totalFollowers = Utilities.calculateTotalFollowers(tweetDS, spark)
     val avgFollowers = totalFollowers / userCount
-    val medianFollowers = Utilities.calculateMedianFollowers(tweetList)
+    val medianFollowers = Utilities.calculateMedianFollowers(tweetDS, spark)
 
     implicit object TweetFormat extends DefaultCSVFormat {
       override val delimiter = '\t'
