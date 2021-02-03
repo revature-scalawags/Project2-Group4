@@ -4,11 +4,10 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.{LongType, StringType}
 
-// TODO(rastal) actually implement testing for the utilities functions
 class UtilitiesTest extends org.scalatest.funsuite.AnyFunSuite {
   val spark = SparkSession
     .builder
-    .master("local[1]")
+    .master("local[4]")
     .appName("hashtag-influence-analysis-test")
     .getOrCreate()
   import spark.implicits._
