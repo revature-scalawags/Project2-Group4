@@ -2,7 +2,7 @@
 
 ## Project Description
 
-Analysis of historical and live Twitter data using Apache Spark, with a focus on hashtags.
+Analysis of historical and live tweets and hashtags from Twitter using Apache Spark.
 
 ## Technologies Used
 
@@ -39,8 +39,9 @@ Analysis of historical and live Twitter data using Apache Spark, with a focus on
 * Writes analysis results to a `.tsv` file in an Amazon S3 bucket.
 
 TODO:
-* Wow improvement to be done 1
-* Wow improvement to be done 2
+* Add sentiment analysis to historical hashtag data.
+* Add influence analysis to streaming tweet data.
+* Set up an Amazon EMR instance for running .jar files on Spark in the cloud.
 
 ## Getting Started
    
