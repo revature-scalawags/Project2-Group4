@@ -1,7 +1,7 @@
 import snscrape.modules.twitter as sntwitter
 import sys
 
-hashtag = sys.argv[0]
+hashtag = sys.argv[1]
 max_results = 10000
 
 # get the tweets by hashtag and save them to a file
