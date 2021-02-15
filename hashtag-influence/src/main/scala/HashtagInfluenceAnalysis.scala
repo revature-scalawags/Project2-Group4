@@ -20,9 +20,9 @@ object HashtagInfluenceAnalysis {
       sys.exit(-1)
     }
 
-    val key = System.getenv("AWS_ACCESS_KEY_ID")
-    val secret = System.getenv("AWS_SECRET_ACCESS_KEY")
-    val s3client = getS3Client(key, secret)
+    // val key = System.getenv("AWS_ACCESS_KEY_ID")
+    // val secret = System.getenv("AWS_SECRET_ACCESS_KEY")
+    // val s3client = getS3Client(key, secret)
     val input = args(0)
     val pathNodes = input match {
       case _ if input.contains("/") => input.split('/')
@@ -77,8 +77,8 @@ object HashtagInfluenceAnalysis {
       avgFollowers,
       medianFollowers))
 
-    val s3Path = "jeroen-twitter-demo-bucket/output"
-    s3client.putObject(s3Path,output.getName,output)
+    // val s3Path = "jeroen-twitter-demo-bucket/output"
+    // s3client.putObject(s3Path,output.getName,output)
     writer.close()
     spark.stop()
   }

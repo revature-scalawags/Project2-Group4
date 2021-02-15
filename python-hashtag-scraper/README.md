@@ -20,3 +20,7 @@ Only include the hashtag's text; don't pass in the actual `#` character as part 
 Outputs a single `.tsv` file named as `your_hashtag.tsv` (with "your_hashtag" replaced with whatever hashtag you passed in as your argument).
 
 The file is structured with columns of `text`, `username`, and `followers`, each separated by a tab, with each row a different tweet.
+
+## Contributors
+
+* [Rastal](https://github.com/therastal)

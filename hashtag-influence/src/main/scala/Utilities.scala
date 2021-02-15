@@ -37,9 +37,9 @@ object Utilities {
     
     val users = calculateUserCount(tweets, spark)
     val median = {
-      if (users % 2 == 0) 
+      if (users % 2 == 0)
         (users / 2).toLong - 1
-      else 
+      else
         ((users + 1) / 2).toLong - 1
     }
     val uniqueUsers = tweets.dropDuplicates("username")
