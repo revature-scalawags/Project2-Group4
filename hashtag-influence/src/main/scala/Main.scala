@@ -12,7 +12,7 @@ import com.github.tototoshi.csv._
 import java.io.File
 import java.time.LocalDateTime
 
-object HashtagInfluenceAnalysis {
+object Main {
   def main(args: Array[String]) {
     if (args.length != 1) {
       println("[ERROR]: Please specify a tsv file as input with sbt \"run [filepath]\". " +
@@ -20,9 +20,9 @@ object HashtagInfluenceAnalysis {
       sys.exit(-1)
     }
 
-    // val key = System.getenv("AWS_ACCESS_KEY_ID")
-    // val secret = System.getenv("AWS_SECRET_ACCESS_KEY")
-    // val s3client = getS3Client(key, secret)
+    val key = System.getenv("AWS_ACCESS_KEY_ID")
+    val secret = System.getenv("AWS_SECRET_ACCESS_KEY")
+    val s3client = getS3Client(key, secret)
     val input = args(0)
     val pathNodes = input match {
       case _ if input.contains("/") => input.split('/')
@@ -33,9 +33,14 @@ object HashtagInfluenceAnalysis {
 
     val spark = SparkSession
       .builder
-      .master("local[1]")
+      .master("local[4]")
       .appName("hashtag-influence-analysis")
       .getOrCreate()
+      
+    spark
+      .sparkContext
+      .setLogLevel("WARN")
+
     import spark.implicits._  
 
     val schema = new StructType()
@@ -50,14 +55,14 @@ object HashtagInfluenceAnalysis {
       .load(input)
       .as[Tweet]
       .cache()
-    val tweetList = tweetDS
-      .collectAsList()
 
-    val userCount = Utilities.calculateUserCount(tweetDS, spark)
-    val totalFollowers = Utilities.calculateTotalFollowers(tweetDS, spark)
+    // Run the analyses
+    val userCount = HashtagInfluence.userCount(tweetDS, spark)
+    val totalFollowers = HashtagInfluence.totalFollowers(tweetDS, spark)
     val avgFollowers = totalFollowers / userCount
-    val medianFollowers = Utilities.calculateMedianFollowers(tweetDS, spark)
+    val medianFollowers = HashtagInfluence.medianFollowers(tweetDS, spark)
 
+    // Set output format to tsv instead of csv
     implicit object TweetFormat extends DefaultCSVFormat {
       override val delimiter = '\t'
     }
@@ -75,10 +80,11 @@ object HashtagInfluenceAnalysis {
       userCount, 
       totalFollowers,
       avgFollowers,
-      medianFollowers))
+      medianFollowers
+    ))
 
-    // val s3Path = "jeroen-twitter-demo-bucket/output"
-    // s3client.putObject(s3Path,output.getName,output)
+    val s3Path = "jeroen-twitter-demo-bucket/output"
+    s3client.putObject(s3Path,output.getName,output)
     writer.close()
     spark.stop()
   }

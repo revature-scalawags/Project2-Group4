@@ -3,13 +3,17 @@ package com.revature.project2.group4.hashtaginfluence
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.{LongType, StringType}
+import org.scalatest.funsuite.AnyFunSuite
 
-class UtilitiesTest extends org.scalatest.funsuite.AnyFunSuite {
+class HashtagInfluenceTest extends AnyFunSuite {
   val spark = SparkSession
     .builder
-    .master("local[4]")
+    .master("local[1]")
     .appName("hashtag-influence-analysis-test")
     .getOrCreate()
+  spark
+    .sparkContext
+    .setLogLevel("WARN")
   import spark.implicits._
 
   val tweetSeq = Seq(
@@ -23,17 +27,17 @@ class UtilitiesTest extends org.scalatest.funsuite.AnyFunSuite {
   val tweetDS = tweetSeq.toDS().cache()
   
   test("calculateUserCount should return 5 users for test dataset") {
-    val count = Utilities.calculateUserCount(tweetDS, spark)
+    val count = HashtagInfluence.userCount(tweetDS, spark)
     assert(count == 5)
   }
 
   test("calculateTotalFollowers should return 1001048 for test dataset") {
-    val followers = Utilities.calculateTotalFollowers(tweetDS, spark)
+    val followers = HashtagInfluence.totalFollowers(tweetDS, spark)
     assert(followers == 1001048)
   }
 
   test("calculateMedianFollowers should return 24 for test dataset") {
-    val median = Utilities.calculateMedianFollowers(tweetDS, spark)
+    val median = HashtagInfluence.medianFollowers(tweetDS, spark)
     assert(median == 24)
   }
 }
